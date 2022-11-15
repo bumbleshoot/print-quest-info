@@ -1,5 +1,5 @@
 /**
- * Print Quest Info v1.0.1 by @bumbleshoot
+ * Print Quest Info v1.1.0 by @bumbleshoot
  *
  * See GitHub page for info & setup instructions:
  * https://github.com/bumbleshoot/print-quest-info
@@ -111,7 +111,7 @@ function printQuestInfo() {
   sheet.clearContents();
   let span = USERNAME == "" ? "whole party" : USERNAME;
   sheet.getRange("A1").setValue("Report ran for " + span + ", " + new Date().toString());
-  var headings = ["#", "Quest Type", "Completions/Completions Needed", "% Complete", "# Members Who Need This Quest", "Quest Reward(s)", "Quest Name", "Members With Scroll"];
+  var headings = ["#", "Quest Type", "Completions/Completions Needed", "% Complete", "# Members Who Need This Quest", "Quest Reward(s)", "Quest Name", "Complete By", "Members With Scroll"];
   sheet.getRange(2, 1, 1, headings.length).setValues([headings]);
   var numHeadings = sheet.getLastRow();
 
@@ -142,9 +142,9 @@ function printQuestInfo() {
 
     // add row to array
     if (USERNAME != "") {
-      questsArray[i] = [sheet.getLastRow()-numHeadings+i+1, quests[i].type, quests[i].completedIndividual[USERNAME] + "/" + quests[i].neededIndividual, Math.round(quests[i].completedIndividual[USERNAME] / quests[i].neededIndividual * 100) + "%", membersIncomplete, quests[i].rewards.map(x => x.name).join(", "), quests[i].name, membersWithScroll];
+      questsArray[i] = [sheet.getLastRow()-numHeadings+i+1, quests[i].type, quests[i].completedIndividual[USERNAME] + "/" + quests[i].neededIndividual, Math.round(quests[i].completedIndividual[USERNAME] / quests[i].neededIndividual * 100) + "%", membersIncomplete, quests[i].rewards.map(x => x.name).join(", "), quests[i].name, quests[i].completeBy, membersWithScroll];
     } else {
-      questsArray[i] = [sheet.getLastRow()-numHeadings+i+1, quests[i].type, quests[i].completedParty + "/" + quests[i].neededParty, Math.round(quests[i].completedParty / quests[i].neededParty * 100) + "%", membersIncomplete, quests[i].rewards.map(x => x.name).join(", "), quests[i].name, membersWithScroll];
+      questsArray[i] = [sheet.getLastRow()-numHeadings+i+1, quests[i].type, quests[i].completedParty + "/" + quests[i].neededParty, Math.round(quests[i].completedParty / quests[i].neededParty * 100) + "%", membersIncomplete, quests[i].rewards.map(x => x.name).join(", "), quests[i].name, quests[i].completeBy, membersWithScroll];
     }
   }
 
@@ -285,6 +285,18 @@ function getQuestData() {
         }
       }
 
+      // complete by
+      let completeBy = quest?.boss?.hp;
+      if (typeof completeBy !== "undefined") {
+        completeBy += " HP";
+      } else {
+        completeBy = "";
+        for (collect of Object.values(quest.collect)) {
+          completeBy += collect.count + " " + collect.text + ", ";
+        }
+        completeBy = completeBy.substring(0, completeBy.length-2);
+      }
+
       // get rewards
       let rewards = [];
       let numEggs = 0;
@@ -368,7 +380,8 @@ function getQuestData() {
         neededParty: neededIndividual * members.length,
         completedParty,
         neededIndividual,
-        completedIndividual
+        completedIndividual,
+        completeBy
       };
       let rewardType = rewards.length > 0 ? rewards[0].type : null;
       if (typeof quest.event !== "undefined") {
@@ -430,7 +443,8 @@ function getQuestData() {
           completedParty,
           neededIndividual,
           completedIndividual,
-          type: eggQuests[i].type
+          type: eggQuests[i].type,
+          completeBy: eggQuests[i].completeBy === eggQuests[j].completeBy ? eggQuests[i].completeBy : eggQuests[i].completeBy + " OR " + eggQuests[j].completeBy
         });
 
         // delete individual quests
