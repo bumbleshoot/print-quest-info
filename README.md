@@ -20,9 +20,10 @@ Repeat steps 8-10 whenever you want to update the spreadsheet.
 ## Updating the Script
 1. [Click here](https://script.google.com/home) to see a list of your scripts. If you're not already signed into your Google account, click the "Start Scripting" button and sign in.  Then click on "My Projects" in the main menu on the left.
 2. Click on "Print Quest Info".
-3. In the main menu on the left, click on "Overview" (looks like a lowercase letter i inside a circle).
-4. Click the "Remove project" button (looks like a trash can).
-5. Follow the [Setup Instructions](#setup-instructions) above.
+3. Copy & paste your settings (`const`s) into a text editor so you can reference them while setting up the new version.
+4. In the main menu on the left, click on "Overview" (looks like a lowercase letter i inside a circle).
+5. Click the "Remove project" button (looks like a trash can).
+6. Follow the [Setup Instructions](#setup-instructions) above.
 
 ## Contact
 :grey_question: Questions: [https://github.com/bumbleshoot/print-quest-info/discussions/categories/q-a](https://github.com/bumbleshoot/print-quest-info/discussions/categories/q-a)  

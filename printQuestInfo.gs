@@ -1,5 +1,5 @@
 /**
- * Print Quest Info v1.0.0 by @bumbleshoot
+ * Print Quest Info v1.0.1 by @bumbleshoot
  *
  * See GitHub page for info & setup instructions:
  * https://github.com/bumbleshoot/print-quest-info
@@ -429,7 +429,8 @@ function getQuestData() {
           neededParty: neededIndividual * members.length,
           completedParty,
           neededIndividual,
-          completedIndividual
+          completedIndividual,
+          type: eggQuests[i].type
         });
 
         // delete individual quests
