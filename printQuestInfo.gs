@@ -1,5 +1,5 @@
 /**
- * Print Quest Info v1.1.0 by @bumbleshoot
+ * Print Quest Info v2.0.0 by @bumbleshoot
  *
  * See GitHub page for info & setup instructions:
  * https://github.com/bumbleshoot/print-quest-info
@@ -111,7 +111,7 @@ function printQuestInfo() {
   sheet.clearContents();
   let span = USERNAME == "" ? "whole party" : USERNAME;
   sheet.getRange("A1").setValue("Report ran for " + span + ", " + new Date().toString());
-  var headings = ["#", "Quest Type", "Completions/Completions Needed", "% Complete", "# Members Who Need This Quest", "Quest Reward(s)", "Quest Name", "Complete By", "Members With Scroll"];
+  var headings = ["#", "Quest Type", "Completions/Completions Needed", "% Complete", "# Members Who Need This Quest", "Quest Reward(s)", "Quest Name", "Complete By", "Members With Scroll", "Members Who Need This Quest"];
   sheet.getRange(2, 1, 1, headings.length).setValues([headings]);
   var numHeadings = sheet.getLastRow();
 
@@ -120,31 +120,39 @@ function printQuestInfo() {
   for (let i=0; i<quests.length; i++) {
 
     // get members incomplete
-    let membersIncomplete = 0;
+    let numMembersIncomplete = 0;
+    let membersIncomplete = "";
     if (USERNAME == "") {
-      for (completions of Object.values(quests[i].completedIndividual)) {
+      for ([username, completions] of Object.entries(quests[i].completedIndividual)) {
         if (completions < quests[i].neededIndividual) {
-          membersIncomplete++;
+          numMembersIncomplete++;
+          membersIncomplete += username + ", ";
         }
       }
+      membersIncomplete = membersIncomplete.substring(0, membersIncomplete.length-2);
     } else if (quests[i].completedIndividual[USERNAME] < quests[i].neededIndividual) {
-      membersIncomplete++;
+      numMembersIncomplete = 1;
+      membersIncomplete = USERNAME;
     }
 
     // get list of members with scrolls as string
     let membersWithScroll = "";
-    for (let j=0; j<quests[i].membersWithScroll.length; j++) {
-      membersWithScroll += quests[i].membersWithScroll[j];
-      if (j < quests[i].membersWithScroll.length - 1) {
-        membersWithScroll += ", ";
+    if (USERNAME == "") {
+      for (let j=0; j<quests[i].membersWithScroll.length; j++) {
+        membersWithScroll += quests[i].membersWithScroll[j];
+        if (j < quests[i].membersWithScroll.length - 1) {
+          membersWithScroll += ", ";
+        }
       }
+    } else if (quests[i].membersWithScroll.includes(USERNAME)) {
+      membersWithScroll = USERNAME;
     }
-
+ 
     // add row to array
     if (USERNAME != "") {
-      questsArray[i] = [sheet.getLastRow()-numHeadings+i+1, quests[i].type, quests[i].completedIndividual[USERNAME] + "/" + quests[i].neededIndividual, Math.round(quests[i].completedIndividual[USERNAME] / quests[i].neededIndividual * 100) + "%", membersIncomplete, quests[i].rewards.map(x => x.name).join(", "), quests[i].name, quests[i].completeBy, membersWithScroll];
+      questsArray[i] = [sheet.getLastRow()-numHeadings+i+1, quests[i].type, quests[i].completedIndividual[USERNAME] + "/" + quests[i].neededIndividual, Math.round(quests[i].completedIndividual[USERNAME] / quests[i].neededIndividual * 100) + "%", numMembersIncomplete, quests[i].rewards.map(x => x.name).join(", "), quests[i].name, quests[i].completeBy, membersWithScroll, membersIncomplete];
     } else {
-      questsArray[i] = [sheet.getLastRow()-numHeadings+i+1, quests[i].type, quests[i].completedParty + "/" + quests[i].neededParty, Math.round(quests[i].completedParty / quests[i].neededParty * 100) + "%", membersIncomplete, quests[i].rewards.map(x => x.name).join(", "), quests[i].name, quests[i].completeBy, membersWithScroll];
+      questsArray[i] = [sheet.getLastRow()-numHeadings+i+1, quests[i].type, quests[i].completedParty + "/" + quests[i].neededParty, Math.round(quests[i].completedParty / quests[i].neededParty * 100) + "%", numMembersIncomplete, quests[i].rewards.map(x => x.name).join(", "), quests[i].name, quests[i].completeBy, membersWithScroll, membersIncomplete];
     }
   }
 
@@ -241,12 +249,50 @@ function getQuestData() {
   console.log("Getting quest data");
 
   // get party member data
-  let members = getMembers();
+  getMembers();
 
   // sort party members by username
   members.sort((a, b) => {
     return a.auth.local.username.localeCompare(b.auth.local.username);
   })
+
+  // get # each egg & hatching potion owned/used for each member
+  for (member of members) {
+    member.numEachEggOwnedUsed = member.items.eggs;
+    member.numEachPotionOwnedUsed = member.items.hatchingPotions;
+    for ([pet, amount] of Object.entries(member.items.pets)) {
+      if (amount > 0) { // 5 = newly hatched pet, >5 = fed pet, -1 = mount but no pet
+        pet = pet.split("-");
+        let species = pet[0];
+        let color = pet[1];
+        if (member.numEachEggOwnedUsed.hasOwnProperty(species)) {
+          member.numEachEggOwnedUsed[species] = member.numEachEggOwnedUsed[species] + 1;
+        } else {
+          member.numEachEggOwnedUsed[species] = 1;
+        }
+        if (member.numEachPotionOwnedUsed.hasOwnProperty(color)) {
+          member.numEachPotionOwnedUsed[color] = member.numEachPotionOwnedUsed[color] + 1;
+        } else {
+          member.numEachPotionOwnedUsed[color] = 1;
+        }
+      }
+    }
+    for (mount of Object.keys(member.items.mounts)) {
+      mount = mount.split("-");
+      let species = mount[0];
+      let color = mount[1];
+      if (member.numEachEggOwnedUsed.hasOwnProperty(species)) {
+        member.numEachEggOwnedUsed[species] = member.numEachEggOwnedUsed[species] + 1;
+      } else {
+        member.numEachEggOwnedUsed[species] = 1;
+      }
+      if (member.numEachPotionOwnedUsed.hasOwnProperty(color)) {
+        member.numEachPotionOwnedUsed[color] = member.numEachPotionOwnedUsed[color] + 1;
+      } else {
+        member.numEachPotionOwnedUsed[color] = 1;
+      }
+    }
+  }
 
   // get lists of premium eggs, premium hatching potions & wacky hatching potions
   let premiumEggs = [];
@@ -262,46 +308,22 @@ function getQuestData() {
     wackyHatchingPotions.push(potion.key);
   }
 
-  // for each quest
+  // create quest lists
   let eggQuests = [];
   let hatchingPotionQuests = [];
   let seasonalQuests = [];
   let masterclasserQuests = [];
   let unlockableQuests = [];
   let achievementQuests = [];
+
+  // for each quest
   for (quest of Object.values(content.quests)) {
 
-    // if not a world boss
+    // if not a world boss quest
     if (quest.category != "world") {
-
-      // list party members with scroll
-      let membersWithScroll = [];
-      for (member of members) {
-        for ([questKey, numScrolls] of Object.entries(member.items.quests)) {
-          if (questKey == quest.key && numScrolls > 0) {
-            membersWithScroll.push(member.auth.local.username);
-            break;
-          }
-        }
-      }
-
-      // complete by
-      let completeBy = quest?.boss?.hp;
-      if (typeof completeBy !== "undefined") {
-        completeBy += " HP";
-      } else {
-        completeBy = "";
-        for (collect of Object.values(quest.collect)) {
-          completeBy += collect.count + " " + collect.text + ", ";
-        }
-        completeBy = completeBy.substring(0, completeBy.length-2);
-      }
 
       // get rewards
       let rewards = [];
-      let numEggs = 0;
-      let numHatchingPotions = 0;
-      let numWackyPotions = 0;
       if (typeof quest.drop.items !== "undefined") {
 
         for (drop of quest.drop.items) {
@@ -310,18 +332,12 @@ function getQuestData() {
           let rewardType = "";
 
           if (drop.type == "eggs" && premiumEggs.includes(drop.key)) {
-            rewardName = drop.text.replaceAll("(", "").replaceAll(")", "");
-            if (rewardName == "Plain Egg") {
-              rewardName = "Egg Egg";
-            }
+            rewardName = content.eggs[drop.key].text + " Egg";
             rewardType = "egg";
-            numEggs++;
           } else if (drop.type == "hatchingPotions" && premiumHatchingPotions.includes(drop.key)) {
             rewardType = "hatchingPotion";
-            numHatchingPotions++;
           } else if (drop.type == "hatchingPotions" && wackyHatchingPotions.includes(drop.key)) {
             rewardType = "wackyPotion";
-            numWackyPotions++;
           } else if (drop.type == "mounts") {
             rewardType = "mount";
           } else if (drop.type == "pets") {
@@ -334,6 +350,7 @@ function getQuestData() {
             let index = rewards.findIndex(reward => reward.name == rewardName);
             if (index == -1) {
               rewards.push({
+                key: drop.key,
                 name: rewardName,
                 type: rewardType,
                 qty: 1
@@ -345,44 +362,85 @@ function getQuestData() {
         }
       }
 
-      // get completions needed
-      let neededIndividual = 1;
-      if (numEggs > 0) {
-        neededIndividual = Math.max(neededIndividual, Math.ceil(20 / numEggs));
-      }
-      if (numHatchingPotions > 0) {
-        neededIndividual = Math.max(neededIndividual, Math.ceil(18 / numHatchingPotions));
-      }
-      if (numWackyPotions > 0) {
-        neededIndividual = Math.max(neededIndividual, Math.ceil(9 / numWackyPotions));
-      }
-
-      // get completions (party & individual)
+      // get completions needed & completions (party & individual)
+      let neededIndividual;
+      let neededParty;
       let completedParty = 0;
       let completedIndividual = {};
+      if (rewards.length > 0 && rewards[0].type == "egg") {
+        neededIndividual = 20 / rewards[0].qty;
+        for (member of members) {
+          let timesCompleted = Math.min(member.numEachEggOwnedUsed[rewards[0].key] / rewards[0].qty, neededIndividual);
+          completedParty += timesCompleted;
+          completedIndividual[member.auth.local.username] = Math.floor(Math.ceil(neededIndividual) * timesCompleted / neededIndividual);
+        }
+      } else if (rewards.length > 0 && (rewards[0].type == "hatchingPotion" || rewards[0].type == "wackyPotion")) {
+        if (rewards[0].type == "hatchingPotion") {
+          neededIndividual = 18 / rewards[0].qty;
+        } else {
+          neededIndividual = 9 / rewards[0].qty;
+        }
+        for (member of members) {
+          let timesCompleted = Math.min(member.numEachPotionOwnedUsed[rewards[0].key] / rewards[0].qty, neededIndividual);
+          completedParty += timesCompleted;
+          completedIndividual[member.auth.local.username] = Math.floor(Math.ceil(neededIndividual) * timesCompleted / neededIndividual);
+        }
+      } else {
+        neededIndividual = 1;
+        for (member of members) {
+          let timesCompleted = 0;
+          for ([questKey, completions] of Object.entries(member.achievements.quests)) {
+            if (questKey == quest.key) {
+              timesCompleted = Math.min(completions, neededIndividual);
+              completedParty += timesCompleted;
+              break;
+            }
+          }
+          completedIndividual[member.auth.local.username] = timesCompleted;
+        }
+      }
+      neededParty = neededIndividual * members.length;
+      let percentComplete = completedParty / neededParty;
+      neededIndividual = Math.ceil(neededIndividual);
+      neededParty = neededIndividual * members.length;
+      completedParty = Math.floor(neededParty * percentComplete);
+
+      // get complete by
+      let completeBy = quest?.boss?.hp;
+      if (typeof completeBy !== "undefined") {
+        completeBy += " HP";
+      } else {
+        completeBy = "";
+        for (collect of Object.values(quest.collect)) {
+          completeBy += collect.count + " " + collect.text + ", ";
+        }
+        completeBy = completeBy.substring(0, completeBy.length-2);
+      }
+
+      // get members with scroll
+      let membersWithScroll = [];
       for (member of members) {
-        let timesCompleted = 0;
-        for ([questKey, completions] of Object.entries(member.achievements.quests)) {
-          if (questKey == quest.key) {
-            timesCompleted = Math.min(completions, neededIndividual);
-            completedParty += timesCompleted;
+        for ([questKey, numScrolls] of Object.entries(member.items.quests)) {
+          if (questKey == quest.key && numScrolls > 0) {
+            membersWithScroll.push(member.auth.local.username);
             break;
           }
         }
-        completedIndividual[member.auth.local.username] = timesCompleted;
       }
 
-      // add to quest list
+      // create quest object
       let questInfo = {
         name: quest.text,
         rewards,
         membersWithScroll,
-        neededParty: neededIndividual * members.length,
+        neededParty,
         completedParty,
         neededIndividual,
         completedIndividual,
         completeBy
       };
+
+      // determine quest type & add to corresponding quest list
       let rewardType = rewards.length > 0 ? rewards[0].type : null;
       if (typeof quest.event !== "undefined") {
         questInfo.type = "S";
@@ -413,15 +471,6 @@ function getQuestData() {
       // if rewards are the same
       if (eggQuests[i].rewards.map(x => JSON.stringify(x)).sort((a, b) => a.localeCompare(b)).join(",") === eggQuests[j].rewards.map(x => JSON.stringify(x)).sort((a, b) => a.localeCompare(b)).join(",")) {
 
-        // combine membersWithScroll
-        let membersWithScroll = eggQuests[i].membersWithScroll;
-        for (member of eggQuests[j].membersWithScroll) {
-          if (!membersWithScroll.includes(member)) {
-            membersWithScroll.push(member);
-          }
-        }
-        membersWithScroll.sort();
-
         // combine neededIndividual
         let neededIndividual = Math.max(eggQuests[i].neededIndividual, eggQuests[j].neededIndividual);
 
@@ -433,6 +482,15 @@ function getQuestData() {
           completedIndividual[key] = timesCompleted;
           completedParty += timesCompleted;
         }
+
+        // combine membersWithScroll
+        let membersWithScroll = eggQuests[i].membersWithScroll;
+        for (member of eggQuests[j].membersWithScroll) {
+          if (!membersWithScroll.includes(member)) {
+            membersWithScroll.push(member);
+          }
+        }
+        membersWithScroll.sort();
 
         // combine everything else & save to quest list
         eggQuests.push({
