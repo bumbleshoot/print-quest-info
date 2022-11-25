@@ -1,5 +1,5 @@
 /**
- * Print Quest Info v2.0.1 by @bumbleshoot
+ * Print Quest Info v2.0.2 by @bumbleshoot
  *
  * See GitHub page for info & setup instructions:
  * https://github.com/bumbleshoot/print-quest-info
@@ -62,6 +62,9 @@ function printQuestInfo() {
 
   // get API data
   members = JSON.parse(fetch("https://habitica.com/api/v3/groups/party/members?includeAllPublicFields=true", GET_PARAMS)).data;
+  if (typeof members === "undefined") {
+    members = [JSON.parse(fetch("https://habitica.com/api/v3/user", GET_PARAMS)).data];
+  }
   content = JSON.parse(fetch("https://habitica.com/api/v3/content", GET_PARAMS)).data;
 
   // if username not in party, print error & exit
