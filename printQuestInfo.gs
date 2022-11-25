@@ -1,5 +1,5 @@
 /**
- * Print Quest Info v2.0.0 by @bumbleshoot
+ * Print Quest Info v2.0.1 by @bumbleshoot
  *
  * See GitHub page for info & setup instructions:
  * https://github.com/bumbleshoot/print-quest-info
@@ -35,6 +35,8 @@ const scriptProperties = PropertiesService.getScriptProperties();
  * print info pertaining to that user. (Note: usernames are case 
  * sensitive!)
  */
+let members;
+let content;
 function printQuestInfo() {
 
   // open spreadsheet & sheet
@@ -58,10 +60,14 @@ function printQuestInfo() {
     }
   }
 
+  // get API data
+  members = JSON.parse(fetch("https://habitica.com/api/v3/groups/party/members?includeAllPublicFields=true", GET_PARAMS)).data;
+  content = JSON.parse(fetch("https://habitica.com/api/v3/content", GET_PARAMS)).data;
+
   // if username not in party, print error & exit
   if (USERNAME !== "") {
     let found = false;
-    for (member of getMembers()) {
+    for (member of members) {
       if (member.auth.local.username === USERNAME) {
         found = true;
         break;
@@ -211,34 +217,6 @@ function printQuestInfo() {
 }
 
 /**
- * getMembers()
- * 
- * Fetches party member data from the Habitica API if it hasn't 
- * already been fetched during this execution.
- */
-let members;
-function getMembers() {
-  if (typeof members === "undefined") {
-    members = JSON.parse(fetch("https://habitica.com/api/v3/groups/party/members?includeAllPublicFields=true", GET_PARAMS)).data;
-  }
-  return members;
-}
-
-/**
- * getContent()
- * 
- * Fetches content data from the Habitica API if it hasn't already 
- * been fetched during this execution.
- */
- let content;
- function getContent() {
-   if (typeof content === "undefined") {
-     content = JSON.parse(fetch("https://habitica.com/api/v3/content", GET_PARAMS)).data;
-   }
-   return content;
- }
-
-/**
  * getQuestData()
  * 
  * Gathers relevant quest data from Habitica's API, arranges it
@@ -247,9 +225,6 @@ function getMembers() {
 function getQuestData() {
 
   console.log("Getting quest data");
-
-  // get party member data
-  getMembers();
 
   // sort party members by username
   members.sort((a, b) => {
@@ -296,7 +271,7 @@ function getQuestData() {
 
   // get lists of premium eggs, premium hatching potions & wacky hatching potions
   let premiumEggs = [];
-  for (egg of Object.values(getContent().questEggs)) {
+  for (egg of Object.values(content.questEggs)) {
     premiumEggs.push(egg.key);
   }
   let premiumHatchingPotions = [];
