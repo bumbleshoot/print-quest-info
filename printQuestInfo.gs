@@ -1,5 +1,5 @@
 /**
- * Print Quest Info v3.0.0 by @bumbleshoot
+ * Print Quest Info v4.0.0 by @bumbleshoot
  *
  * See GitHub page for info & setup instructions:
  * https://github.com/bumbleshoot/print-quest-info
@@ -95,6 +95,11 @@ function printQuestInfo() {
     return a.rewards.map(x => x.name).join(",").localeCompare(b.rewards.map(x => x.name).join(","));
   });
 
+  // sort pet quests alphabetically
+  questData.petQuests.sort((a, b) => {
+    return a.name.localeCompare(b.name);
+  });
+
   // sort masterclasser quests chronologically
   let masterclasserOrder = ["Dilatory Distress", "Terror in the Taskwoods", "Stoïkalm Calamity", "Mayhem in Mistiflying", "The Mystery of the Masterclassers"];
   questData.masterclasserQuests.sort((a, b) => {
@@ -112,7 +117,7 @@ function printQuestInfo() {
   });
 
   // combine quest lists into one
-  let quests = questData.eggQuests.concat(questData.hatchingPotionQuests).concat(questData.seasonalQuests).concat(questData.masterclasserQuests).concat(questData.unlockableQuests).concat(questData.achievementQuests);
+  let quests = questData.eggQuests.concat(questData.hatchingPotionQuests).concat(questData.petQuests).concat(questData.masterclasserQuests).concat(questData.unlockableQuests).concat(questData.achievementQuests);
 
   console.log("Printing quest info");
 
@@ -120,9 +125,18 @@ function printQuestInfo() {
   sheet.clearContents();
   let span = USERNAME == "" ? "whole party" : USERNAME;
   sheet.getRange("A1").setValue("Report ran for " + span + ", " + new Date().toString());
-  var headings = ["#", "Quest Type", "Completions/Completions Needed", "% Complete", "# Members Who Need This Quest", "Quest Reward(s)", "Quest Name", "Complete By", "Members With Scroll", "Members Who Need This Quest"];
-  sheet.getRange(2, 1, 1, headings.length).setValues([headings]);
+  var headings = ["#", "Quest Type", "Completions/Completions Needed", "% Complete", "# Members Who Need This Quest", "Quest Reward(s)", "Quest Name", "Complete By", "Seasonal?", "Members With Scroll", "Members Who Need This Quest"];
+  sheet.getRange(2, 1, 1, headings.length).setValues([headings]).setWrap(true).setHorizontalAlignment("center").setVerticalAlignment("middle").setFontWeight("bold");
   var numHeadings = sheet.getLastRow();
+
+  // formatting
+  sheet.setColumnWidths(1, 2, 55);
+  sheet.setColumnWidth(5, 89);
+  sheet.setColumnWidths(6, 2, 191);
+  sheet.setColumnWidth(8, 148);
+  sheet.setColumnWidth(9, 79);
+  sheet.setColumnWidths(10, 2, 229);
+  sheet.setFrozenRows(2);
 
   // for each quest
   let questsArray = [];
@@ -150,9 +164,9 @@ function printQuestInfo() {
  
     // add row to array
     if (USERNAME != "") {
-      questsArray[i] = [sheet.getLastRow()-numHeadings+i+1, quests[i].type, quests[i].completedIndividual[USERNAME] + "/" + quests[i].neededIndividual, Math.round(quests[i].completedIndividual[USERNAME] / quests[i].neededIndividual * 100) + "%", numMembersIncomplete, quests[i].rewards.map(x => x.name).join(", "), quests[i].name, quests[i].completeBy, membersWithScroll, membersIncomplete];
+      questsArray[i] = [sheet.getLastRow()-numHeadings+i+1, quests[i].type, quests[i].completedIndividual[USERNAME] + "/" + quests[i].neededIndividual, Math.round(quests[i].completedIndividual[USERNAME] / quests[i].neededIndividual * 100) + "%", numMembersIncomplete, quests[i].rewards.map(x => x.name).join(", "), quests[i].name, quests[i].completeBy, quests[i].seasonal ? "Y" : "N", membersWithScroll, membersIncomplete];
     } else {
-      questsArray[i] = [sheet.getLastRow()-numHeadings+i+1, quests[i].type, quests[i].completedParty + "/" + quests[i].neededParty, Math.round(quests[i].completedParty / quests[i].neededParty * 100) + "%", numMembersIncomplete, quests[i].rewards.map(x => x.name).join(", "), quests[i].name, quests[i].completeBy, membersWithScroll, membersIncomplete];
+      questsArray[i] = [sheet.getLastRow()-numHeadings+i+1, quests[i].type, quests[i].completedParty + "/" + quests[i].neededParty, Math.round(quests[i].completedParty / quests[i].neededParty * 100) + "%", numMembersIncomplete, quests[i].rewards.map(x => x.name).join(", "), quests[i].name, quests[i].completeBy, quests[i].seasonal ? "Y" : "N", membersWithScroll, membersIncomplete];
     }
   }
 
@@ -160,6 +174,9 @@ function printQuestInfo() {
   if (questsArray.length > 0) {
     sheet.getRange(sheet.getLastRow() + 1, 1, questsArray.length, headings.length).setValues(questsArray);
   }
+
+  // formatting
+  sheet.getRange(3, 1, sheet.getLastRow(), sheet.getLastColumn()).setWrap(true).setHorizontalAlignment("center").setVerticalAlignment("middle");
 
   console.log("Done!");
 }
@@ -280,7 +297,7 @@ function getQuestData() {
   // create quest lists
   let eggQuests = [];
   let hatchingPotionQuests = [];
-  let seasonalQuests = [];
+  let petQuests = [];
   let masterclasserQuests = [];
   let unlockableQuests = [];
   let achievementQuests = [];
@@ -386,6 +403,12 @@ function getQuestData() {
         completeBy = completeBy.substring(0, completeBy.length-2);
       }
 
+      // get seasonal
+      let seasonal = false;
+      if (typeof quest.event !== "undefined") {
+        seasonal = true;
+      }
+
       // get members with scroll
       let membersWithScroll = [];
       for (member of members) {
@@ -406,15 +429,13 @@ function getQuestData() {
         completedParty,
         neededIndividual,
         completedIndividual,
-        completeBy
+        completeBy,
+        seasonal
       };
 
       // determine quest type & add to corresponding quest list
       let rewardType = rewards.length > 0 ? rewards[0].type : null;
-      if (typeof quest.event !== "undefined") {
-        questInfo.type = "S";
-        seasonalQuests.push(questInfo);
-      } else if (quest.group == "questGroupDilatoryDistress" || quest.group == "questGroupTaskwoodsTerror" || quest.group == "questGroupStoikalmCalamity" || quest.group == "questGroupMayhemMistiflying" || quest.group == "questGroupLostMasterclasser") {
+      if (quest.group == "questGroupDilatoryDistress" || quest.group == "questGroupTaskwoodsTerror" || quest.group == "questGroupStoikalmCalamity" || quest.group == "questGroupMayhemMistiflying" || quest.group == "questGroupLostMasterclasser") {
         questInfo.type = "M";
         masterclasserQuests.push(questInfo);
       } else if (quest.text == "The Basi-List" || quest.text == "The Feral Dust Bunnies") {
@@ -429,6 +450,9 @@ function getQuestData() {
       } else if (["hatchingPotion", "wackyPotion"].includes(rewardType)) {
         questInfo.type = "H";
         hatchingPotionQuests.push(questInfo);
+      } else if (rewardType == "pet" || rewardType == "mount") {
+        questInfo.type = "P";
+        petQuests.push(questInfo);
       }
     }
   }
@@ -486,7 +510,7 @@ function getQuestData() {
   return {
     eggQuests,
     hatchingPotionQuests,
-    seasonalQuests,
+    petQuests,
     masterclasserQuests,
     unlockableQuests,
     achievementQuests
