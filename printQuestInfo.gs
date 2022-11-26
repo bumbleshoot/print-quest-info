@@ -1,5 +1,5 @@
 /**
- * Print Quest Info v2.0.2 by @bumbleshoot
+ * Print Quest Info v3.0.0 by @bumbleshoot
  *
  * See GitHub page for info & setup instructions:
  * https://github.com/bumbleshoot/print-quest-info
@@ -131,30 +131,21 @@ function printQuestInfo() {
     // get members incomplete
     let numMembersIncomplete = 0;
     let membersIncomplete = "";
-    if (USERNAME == "") {
-      for ([username, completions] of Object.entries(quests[i].completedIndividual)) {
-        if (completions < quests[i].neededIndividual) {
-          numMembersIncomplete++;
-          membersIncomplete += username + ", ";
-        }
+    for ([username, completions] of Object.entries(quests[i].completedIndividual)) {
+      if (completions < quests[i].neededIndividual) {
+        numMembersIncomplete++;
+        membersIncomplete += username + ", ";
       }
-      membersIncomplete = membersIncomplete.substring(0, membersIncomplete.length-2);
-    } else if (quests[i].completedIndividual[USERNAME] < quests[i].neededIndividual) {
-      numMembersIncomplete = 1;
-      membersIncomplete = USERNAME;
     }
+    membersIncomplete = membersIncomplete.substring(0, membersIncomplete.length-2);
 
     // get list of members with scrolls as string
     let membersWithScroll = "";
-    if (USERNAME == "") {
-      for (let j=0; j<quests[i].membersWithScroll.length; j++) {
-        membersWithScroll += quests[i].membersWithScroll[j];
-        if (j < quests[i].membersWithScroll.length - 1) {
-          membersWithScroll += ", ";
-        }
+    for (let j=0; j<quests[i].membersWithScroll.length; j++) {
+      membersWithScroll += quests[i].membersWithScroll[j];
+      if (j < quests[i].membersWithScroll.length - 1) {
+        membersWithScroll += ", ";
       }
-    } else if (quests[i].membersWithScroll.includes(USERNAME)) {
-      membersWithScroll = USERNAME;
     }
  
     // add row to array
