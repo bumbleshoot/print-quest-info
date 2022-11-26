@@ -2,6 +2,7 @@
 Print Quest Info prints useful info about all of Habitica's quests to a spreadsheet, including # of completions (party or user), completions needed (party or user), % complete (party or user), quest rewards, quest name, how to complete the quest, and party members with the quest scroll in their inventories.
 
 ## Setup Instructions
+You need to use a desktop computer for this. It will not work on a phone or tablet!
 1. Click [here](https://script.google.com/d/14BPBHQy4uGGT80F6ADZ7rsKSWh6l6AgGCFhcXSQP55SOQFYEkSsP6RA4/edit?usp=sharing) to go to the Print Quest Info script. If you're not already signed into your Google account, you will be asked to sign in.
 2. In the main menu on the left, click on "Overview" (looks like a lowercase letter i inside a circle).
 3. Click the "Make a copy" button (looks like two pages of paper).
@@ -20,6 +21,7 @@ Print Quest Info prints useful info about all of Habitica's quests to a spreadsh
 Repeat steps 8-10 whenever you want to update the spreadsheet.
 
 ## Updating the Script
+You need to use a desktop computer for this. It will not work on a phone or tablet!
 1. [Click here](https://script.google.com/home) to see a list of your scripts. If you're not already signed into your Google account, click the "Start Scripting" button and sign in.  Then click on "My Projects" in the main menu on the left.
 2. Click on "Print Quest Info".
 3. Copy & paste your settings (`const`s) into a text editor so you can reference them while setting up the new version.
