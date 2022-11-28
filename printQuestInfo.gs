@@ -1,5 +1,5 @@
 /**
- * Print Quest Info v4.0.0 by @bumbleshoot
+ * Print Quest Info v4.0.1 by @bumbleshoot
  *
  * See GitHub page for info & setup instructions:
  * https://github.com/bumbleshoot/print-quest-info
@@ -305,155 +305,156 @@ function getQuestData() {
   // for each quest
   for (quest of Object.values(content.quests)) {
 
-    // if not a world boss quest
-    if (quest.category != "world") {
+    // if world boss, skip it
+    if (quest.category == "world") {
+      continue;
+    }
 
-      // get rewards
-      let rewards = [];
-      if (typeof quest.drop.items !== "undefined") {
+    // get rewards
+    let rewards = [];
+    if (typeof quest.drop.items !== "undefined") {
 
-        for (drop of quest.drop.items) {
+      for (drop of quest.drop.items) {
 
-          let rewardName = drop.text;
-          let rewardType = "";
+        let rewardName = drop.text;
+        let rewardType = "";
 
-          if (drop.type == "eggs" && premiumEggs.includes(drop.key)) {
-            rewardName = content.eggs[drop.key].text + " Egg";
-            rewardType = "egg";
-          } else if (drop.type == "hatchingPotions" && premiumHatchingPotions.includes(drop.key)) {
-            rewardType = "hatchingPotion";
-          } else if (drop.type == "hatchingPotions" && wackyHatchingPotions.includes(drop.key)) {
-            rewardType = "wackyPotion";
-          } else if (drop.type == "mounts") {
-            rewardType = "mount";
-          } else if (drop.type == "pets") {
-            rewardType = "pet";
-          } else if (drop.type == "gear") {
-            rewardType = "gear";
+        if (drop.type == "eggs" && premiumEggs.includes(drop.key)) {
+          rewardName = content.eggs[drop.key].text + " Egg";
+          rewardType = "egg";
+        } else if (drop.type == "hatchingPotions" && premiumHatchingPotions.includes(drop.key)) {
+          rewardType = "hatchingPotion";
+        } else if (drop.type == "hatchingPotions" && wackyHatchingPotions.includes(drop.key)) {
+          rewardType = "wackyPotion";
+        } else if (drop.type == "mounts") {
+          rewardType = "mount";
+        } else if (drop.type == "pets") {
+          rewardType = "pet";
+        } else if (drop.type == "gear") {
+          rewardType = "gear";
+        }
+
+        if (rewardType != "") {
+          let index = rewards.findIndex(reward => reward.name == rewardName);
+          if (index == -1) {
+            rewards.push({
+              key: drop.key,
+              name: rewardName,
+              type: rewardType,
+              qty: 1
+            });
+          } else {
+            rewards[index].qty++;
           }
-
-          if (rewardType != "") {
-            let index = rewards.findIndex(reward => reward.name == rewardName);
-            if (index == -1) {
-              rewards.push({
-                key: drop.key,
-                name: rewardName,
-                type: rewardType,
-                qty: 1
-              });
-            } else {
-              rewards[index].qty++;
-            }
-          }
         }
       }
+    }
 
-      // get completions needed & completions (party & individual)
-      let neededIndividual;
-      let neededParty;
-      let completedParty = 0;
-      let completedIndividual = {};
-      if (rewards.length > 0 && rewards[0].type == "egg") {
-        neededIndividual = 20 / rewards[0].qty;
-        for (member of members) {
-          let timesCompleted = Math.min(member.numEachEggOwnedUsed[rewards[0].key] / rewards[0].qty, neededIndividual);
-          completedParty += timesCompleted;
-          completedIndividual[member.auth.local.username] = Math.floor(Math.ceil(neededIndividual) * timesCompleted / neededIndividual);
-        }
-      } else if (rewards.length > 0 && (rewards[0].type == "hatchingPotion" || rewards[0].type == "wackyPotion")) {
-        if (rewards[0].type == "hatchingPotion") {
-          neededIndividual = 18 / rewards[0].qty;
-        } else {
-          neededIndividual = 9 / rewards[0].qty;
-        }
-        for (member of members) {
-          let timesCompleted = Math.min(member.numEachPotionOwnedUsed[rewards[0].key] / rewards[0].qty, neededIndividual);
-          completedParty += timesCompleted;
-          completedIndividual[member.auth.local.username] = Math.floor(Math.ceil(neededIndividual) * timesCompleted / neededIndividual);
-        }
-      } else {
-        neededIndividual = 1;
-        for (member of members) {
-          let timesCompleted = 0;
-          for ([questKey, completions] of Object.entries(member.achievements.quests)) {
-            if (questKey == quest.key) {
-              timesCompleted = Math.min(completions, neededIndividual);
-              completedParty += timesCompleted;
-              break;
-            }
-          }
-          completedIndividual[member.auth.local.username] = timesCompleted;
-        }
-      }
-      neededParty = neededIndividual * members.length;
-      let percentComplete = completedParty / neededParty;
-      neededIndividual = Math.ceil(neededIndividual);
-      neededParty = neededIndividual * members.length;
-      completedParty = Math.floor(neededParty * percentComplete);
-
-      // get complete by
-      let completeBy = quest?.boss?.hp;
-      if (typeof completeBy !== "undefined") {
-        completeBy += " HP";
-      } else {
-        completeBy = "";
-        for (collect of Object.values(quest.collect)) {
-          completeBy += collect.count + " " + collect.text + ", ";
-        }
-        completeBy = completeBy.substring(0, completeBy.length-2);
-      }
-
-      // get seasonal
-      let seasonal = false;
-      if (typeof quest.event !== "undefined") {
-        seasonal = true;
-      }
-
-      // get members with scroll
-      let membersWithScroll = [];
+    // get completions needed & completions (party & individual)
+    let neededIndividual;
+    let neededParty;
+    let completedParty = 0;
+    let completedIndividual = {};
+    if (rewards.length > 0 && rewards[0].type == "egg") {
+      neededIndividual = 20 / rewards[0].qty;
       for (member of members) {
-        for ([questKey, numScrolls] of Object.entries(member.items.quests)) {
-          if (questKey == quest.key && numScrolls > 0) {
-            membersWithScroll.push(member.auth.local.username);
+        let timesCompleted = Math.min(member.numEachEggOwnedUsed[rewards[0].key] || 0 / rewards[0].qty, neededIndividual);
+        completedParty += timesCompleted;
+        completedIndividual[member.auth.local.username] = Math.floor(Math.ceil(neededIndividual) * timesCompleted / neededIndividual);
+      }
+    } else if (rewards.length > 0 && (rewards[0].type == "hatchingPotion" || rewards[0].type == "wackyPotion")) {
+      if (rewards[0].type == "hatchingPotion") {
+        neededIndividual = 18 / rewards[0].qty;
+      } else {
+        neededIndividual = 9 / rewards[0].qty;
+      }
+      for (member of members) {
+        let timesCompleted = Math.min(member.numEachPotionOwnedUsed[rewards[0].key] || 0 / rewards[0].qty, neededIndividual);
+        completedParty += timesCompleted;
+        completedIndividual[member.auth.local.username] = Math.floor(Math.ceil(neededIndividual) * timesCompleted / neededIndividual);
+      }
+    } else {
+      neededIndividual = 1;
+      for (member of members) {
+        let timesCompleted = 0;
+        for ([questKey, completions] of Object.entries(member.achievements.quests)) {
+          if (questKey == quest.key) {
+            timesCompleted = Math.min(completions, neededIndividual);
+            completedParty += timesCompleted;
             break;
           }
         }
+        completedIndividual[member.auth.local.username] = timesCompleted;
       }
+    }
+    neededParty = neededIndividual * members.length;
+    let percentComplete = completedParty / neededParty;
+    neededIndividual = Math.ceil(neededIndividual);
+    neededParty = neededIndividual * members.length;
+    completedParty = Math.floor(neededParty * percentComplete);
 
-      // create quest object
-      let questInfo = {
-        name: quest.text,
-        rewards,
-        membersWithScroll,
-        neededParty,
-        completedParty,
-        neededIndividual,
-        completedIndividual,
-        completeBy,
-        seasonal
-      };
-
-      // determine quest type & add to corresponding quest list
-      let rewardType = rewards.length > 0 ? rewards[0].type : null;
-      if (quest.group == "questGroupDilatoryDistress" || quest.group == "questGroupTaskwoodsTerror" || quest.group == "questGroupStoikalmCalamity" || quest.group == "questGroupMayhemMistiflying" || quest.group == "questGroupLostMasterclasser") {
-        questInfo.type = "M";
-        masterclasserQuests.push(questInfo);
-      } else if (quest.text == "The Basi-List" || quest.text == "The Feral Dust Bunnies") {
-        questInfo.type = "A";
-        achievementQuests.push(questInfo);
-      } else if (quest.category == "unlockable") {
-        questInfo.type = "U";
-        unlockableQuests.push(questInfo);
-      } else if (rewardType == "egg") {
-        questInfo.type = "E";
-        eggQuests.push(questInfo);
-      } else if (["hatchingPotion", "wackyPotion"].includes(rewardType)) {
-        questInfo.type = "H";
-        hatchingPotionQuests.push(questInfo);
-      } else if (rewardType == "pet" || rewardType == "mount") {
-        questInfo.type = "P";
-        petQuests.push(questInfo);
+    // get complete by
+    let completeBy = quest?.boss?.hp;
+    if (typeof completeBy !== "undefined") {
+      completeBy += " HP";
+    } else {
+      completeBy = "";
+      for (collect of Object.values(quest.collect)) {
+        completeBy += collect.count + " " + collect.text + ", ";
       }
+      completeBy = completeBy.substring(0, completeBy.length-2);
+    }
+
+    // get seasonal
+    let seasonal = false;
+    if (typeof quest.event !== "undefined") {
+      seasonal = true;
+    }
+
+    // get members with scroll
+    let membersWithScroll = [];
+    for (member of members) {
+      for ([questKey, numScrolls] of Object.entries(member.items.quests)) {
+        if (questKey == quest.key && numScrolls > 0) {
+          membersWithScroll.push(member.auth.local.username);
+          break;
+        }
+      }
+    }
+
+    // create quest object
+    let questInfo = {
+      name: quest.text,
+      rewards,
+      membersWithScroll,
+      neededParty,
+      completedParty,
+      neededIndividual,
+      completedIndividual,
+      completeBy,
+      seasonal
+    };
+
+    // determine quest type & add to corresponding quest list
+    let rewardType = rewards.length > 0 ? rewards[0].type : null;
+    if (quest.group == "questGroupDilatoryDistress" || quest.group == "questGroupTaskwoodsTerror" || quest.group == "questGroupStoikalmCalamity" || quest.group == "questGroupMayhemMistiflying" || quest.group == "questGroupLostMasterclasser") {
+      questInfo.type = "M";
+      masterclasserQuests.push(questInfo);
+    } else if (quest.text == "The Basi-List" || quest.text == "The Feral Dust Bunnies") {
+      questInfo.type = "A";
+      achievementQuests.push(questInfo);
+    } else if (quest.category == "unlockable") {
+      questInfo.type = "U";
+      unlockableQuests.push(questInfo);
+    } else if (rewardType == "egg") {
+      questInfo.type = "E";
+      eggQuests.push(questInfo);
+    } else if (["hatchingPotion", "wackyPotion"].includes(rewardType)) {
+      questInfo.type = "H";
+      hatchingPotionQuests.push(questInfo);
+    } else if (rewardType == "pet" || rewardType == "mount") {
+      questInfo.type = "P";
+      petQuests.push(questInfo);
     }
   }
 
