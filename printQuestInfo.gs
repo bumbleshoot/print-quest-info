@@ -1,5 +1,5 @@
 /**
- * Print Quest Info v4.0.1 by @bumbleshoot
+ * Print Quest Info v4.0.2 by @bumbleshoot
  *
  * See GitHub page for info & setup instructions:
  * https://github.com/bumbleshoot/print-quest-info
@@ -164,9 +164,9 @@ function printQuestInfo() {
  
     // add row to array
     if (USERNAME != "") {
-      questsArray[i] = [sheet.getLastRow()-numHeadings+i+1, quests[i].type, quests[i].completedIndividual[USERNAME] + "/" + quests[i].neededIndividual, Math.round(quests[i].completedIndividual[USERNAME] / quests[i].neededIndividual * 100) + "%", numMembersIncomplete, quests[i].rewards.map(x => x.name).join(", "), quests[i].name, quests[i].completeBy, quests[i].seasonal ? "Y" : "N", membersWithScroll, membersIncomplete];
+      questsArray[i] = [sheet.getLastRow()-numHeadings+i+1, quests[i].type, quests[i].completedIndividual[USERNAME] + "/" + quests[i].neededIndividual, Math.floor(quests[i].completedIndividual[USERNAME] / quests[i].neededIndividual * 100) + "%", numMembersIncomplete, quests[i].rewards.map(x => x.name).join(", "), quests[i].name, quests[i].completeBy, quests[i].seasonal ? "Y" : "N", membersWithScroll, membersIncomplete];
     } else {
-      questsArray[i] = [sheet.getLastRow()-numHeadings+i+1, quests[i].type, quests[i].completedParty + "/" + quests[i].neededParty, Math.round(quests[i].completedParty / quests[i].neededParty * 100) + "%", numMembersIncomplete, quests[i].rewards.map(x => x.name).join(", "), quests[i].name, quests[i].completeBy, quests[i].seasonal ? "Y" : "N", membersWithScroll, membersIncomplete];
+      questsArray[i] = [sheet.getLastRow()-numHeadings+i+1, quests[i].type, quests[i].completedParty + "/" + quests[i].neededParty, Math.floor(quests[i].completedParty / quests[i].neededParty * 100) + "%", numMembersIncomplete, quests[i].rewards.map(x => x.name).join(", "), quests[i].name, quests[i].completeBy, quests[i].seasonal ? "Y" : "N", membersWithScroll, membersIncomplete];
     }
   }
 
@@ -358,7 +358,10 @@ function getQuestData() {
     if (rewards.length > 0 && rewards[0].type == "egg") {
       neededIndividual = 20 / rewards[0].qty;
       for (member of members) {
-        let timesCompleted = Math.min(member.numEachEggOwnedUsed[rewards[0].key] || 0 / rewards[0].qty, neededIndividual);
+        if (typeof member.numEachEggOwnedUsed[rewards[0].key] === "undefined") {
+          member.numEachEggOwnedUsed[rewards[0].key] = 0;
+        }
+        let timesCompleted = Math.min(member.numEachEggOwnedUsed[rewards[0].key] / rewards[0].qty, neededIndividual);
         completedParty += timesCompleted;
         completedIndividual[member.auth.local.username] = Math.floor(Math.ceil(neededIndividual) * timesCompleted / neededIndividual);
       }
@@ -369,7 +372,10 @@ function getQuestData() {
         neededIndividual = 9 / rewards[0].qty;
       }
       for (member of members) {
-        let timesCompleted = Math.min(member.numEachPotionOwnedUsed[rewards[0].key] || 0 / rewards[0].qty, neededIndividual);
+        if (typeof member.numEachPotionOwnedUsed[rewards[0].key] === "undefined") {
+          member.numEachPotionOwnedUsed[rewards[0].key] = 0;
+        }
+        let timesCompleted = Math.min(member.numEachPotionOwnedUsed[rewards[0].key] / rewards[0].qty, neededIndividual);
         completedParty += timesCompleted;
         completedIndividual[member.auth.local.username] = Math.floor(Math.ceil(neededIndividual) * timesCompleted / neededIndividual);
       }
