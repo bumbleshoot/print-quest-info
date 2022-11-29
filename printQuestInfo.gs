@@ -1,5 +1,5 @@
 /**
- * Print Quest Info v4.0.2 by @bumbleshoot
+ * Print Quest Info v4.1.0 by @bumbleshoot
  *
  * See GitHub page for info & setup instructions:
  * https://github.com/bumbleshoot/print-quest-info
@@ -130,12 +130,15 @@ function printQuestInfo() {
   var numHeadings = sheet.getLastRow();
 
   // formatting
-  sheet.setColumnWidths(1, 2, 55);
-  sheet.setColumnWidth(5, 89);
-  sheet.setColumnWidths(6, 2, 191);
-  sheet.setColumnWidth(8, 148);
-  sheet.setColumnWidth(9, 79);
-  sheet.setColumnWidths(10, 2, 229);
+  sheet.setColumnWidth(1, sheet.getColumnWidth(1) == 100 ? 55 : sheet.getColumnWidth(1));
+  sheet.setColumnWidth(2, sheet.getColumnWidth(2) == 100 ? 55 : sheet.getColumnWidth(2));
+  sheet.setColumnWidth(5, sheet.getColumnWidth(5) == 100 ? 89 : sheet.getColumnWidth(5));
+  sheet.setColumnWidth(6, sheet.getColumnWidth(6) == 100 ? 191 : sheet.getColumnWidth(6));
+  sheet.setColumnWidth(7, sheet.getColumnWidth(7) == 100 ? 191 : sheet.getColumnWidth(7));
+  sheet.setColumnWidth(8, sheet.getColumnWidth(8) == 100 ? 148 : sheet.getColumnWidth(8));
+  sheet.setColumnWidth(9, sheet.getColumnWidth(9) == 100 ? 79 : sheet.getColumnWidth(9));
+  sheet.setColumnWidth(10, sheet.getColumnWidth(10) == 100 ? 229 : sheet.getColumnWidth(10));
+  sheet.setColumnWidth(11, sheet.getColumnWidth(11) == 100 ? 229 : sheet.getColumnWidth(11));
   sheet.setFrozenRows(2);
 
   // for each quest
