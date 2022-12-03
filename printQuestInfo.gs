@@ -1,5 +1,5 @@
 /**
- * Print Quest Info v4.1.0 by @bumbleshoot
+ * Print Quest Info v4.1.1 by @bumbleshoot
  *
  * See GitHub page for info & setup instructions:
  * https://github.com/bumbleshoot/print-quest-info
@@ -220,7 +220,7 @@ function printQuestInfo() {
     });
 
     // if success, return response
-    if (response.getResponseCode() < 300) {
+    if (response.getResponseCode() < 300 || (response.getResponseCode() === 404 && (url === "https://habitica.com/api/v3/groups/party" || url.startsWith("https://habitica.com/api/v3/groups/party/members")))) {
       return response;
 
     // if 3xx or 4xx or failed 3 times, throw exception
@@ -474,18 +474,6 @@ function getQuestData() {
       // if rewards are the same
       if (eggQuests[i].rewards.map(x => JSON.stringify(x)).sort((a, b) => a.localeCompare(b)).join(",") === eggQuests[j].rewards.map(x => JSON.stringify(x)).sort((a, b) => a.localeCompare(b)).join(",")) {
 
-        // combine neededIndividual
-        let neededIndividual = Math.max(eggQuests[i].neededIndividual, eggQuests[j].neededIndividual);
-
-        // combine completedParty & completedIndividual
-        let completedParty = 0;
-        let completedIndividual = {};
-        for (key of Object.keys(eggQuests[i].completedIndividual)) {
-          let timesCompleted = Math.min(eggQuests[i].completedIndividual[key] + eggQuests[j].completedIndividual[key], neededIndividual);
-          completedIndividual[key] = timesCompleted;
-          completedParty += timesCompleted;
-        }
-
         // combine membersWithScroll
         let membersWithScroll = eggQuests[i].membersWithScroll;
         for (member of eggQuests[j].membersWithScroll) {
@@ -500,12 +488,13 @@ function getQuestData() {
           name: eggQuests[i].name + " OR " + eggQuests[j].name,
           rewards: eggQuests[i].rewards,
           membersWithScroll,
-          neededParty: neededIndividual * members.length,
-          completedParty,
-          neededIndividual,
-          completedIndividual,
+          neededParty: eggQuests[i].neededParty,
+          completedParty: eggQuests[i].completedParty,
+          neededIndividual: eggQuests[i].neededIndividual,
+          completedIndividual: eggQuests[i].completedIndividual,
           type: eggQuests[i].type,
-          completeBy: eggQuests[i].completeBy === eggQuests[j].completeBy ? eggQuests[i].completeBy : eggQuests[i].completeBy + " OR " + eggQuests[j].completeBy
+          completeBy: eggQuests[i].completeBy === eggQuests[j].completeBy ? eggQuests[i].completeBy : eggQuests[i].completeBy + " OR " + eggQuests[j].completeBy,
+          seasonal: eggQuests[i].seasonal === eggQuests[j].seasonal ? eggQuests[i].seasonal : eggQuests[i].seasonal + ", " + eggQuests[j].seasonal
         });
 
         // delete individual quests
