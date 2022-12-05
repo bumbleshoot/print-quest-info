@@ -1,5 +1,5 @@
 /**
- * Print Quest Info v4.1.1 by @bumbleshoot
+ * Print Quest Info v4.1.2 by @bumbleshoot
  *
  * See GitHub page for info & setup instructions:
  * https://github.com/bumbleshoot/print-quest-info
