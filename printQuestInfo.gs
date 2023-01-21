@@ -1,5 +1,5 @@
 /**
- * Print Quest Info v4.1.3 by @bumbleshoot
+ * Print Quest Info v4.1.4 by @bumbleshoot
  *
  * See GitHub page for info & setup instructions:
  * https://github.com/bumbleshoot/print-quest-info
@@ -238,6 +238,10 @@ function printQuestInfo() {
     // if success, return response
     if (response.getResponseCode() < 300 || (response.getResponseCode() === 404 && (url === "https://habitica.com/api/v3/groups/party" || url.startsWith("https://habitica.com/api/v3/groups/party/members")))) {
       return response;
+
+    // if rate limited due to running multiple scripts, try again
+    } else if (response.getResponseCode() === 429) {
+      i--;
 
     // if 3xx or 4xx or failed 3 times, throw exception
     } else if (response.getResponseCode() < 500 || i >= 2) {
