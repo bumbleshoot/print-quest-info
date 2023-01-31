@@ -12,14 +12,18 @@ You need to use a desktop computer for this. It will not work on a phone or tabl
 5. Click on "Project Settings" in the main menu. Select your time zone from the drop down. Wait for it to finish saving, then click on "Editor" in the main menu.
 6. Click [here](https://habitica.com/user/settings/api) to open your API Settings. Highlight and copy your User ID (it looks something like this: `35c3fb6f-fb98-4bc3-b57a-ac01137d0847`). In the Print Quest Info script, paste your User ID between the quotations where it says `const USER_ID = "";`. It should now look something like this: `const USER_ID = "35c3fb6f-fb98-4bc3-b57a-ac01137d0847";`
 7. On the same page where you copied your User ID, click the "Show API Token" button, and copy your API Token. In the Print Quest Info script, paste your API Token between the quotations where it says `const API_TOKEN = "";`. It should now look something like this: `const API_TOKEN = "35c3fb6f-fb98-4bc3-b57a-ac01137d0847";`
-8. [Create a new Google Sheet](https://sheets.google.com/create) and name it something like "[Party Name] Quest Info". Copy the URL in your address bar and paste it inside the quotations where it says `const SPREADSHEET_URL = "";`. If you've changed the tab name for the sheet you want to print quest info to, paste the tab name inside the quotes where it says `const SHEET_NAME = "";`.
-9. Add a party member's username between the quotations where it says `const USERNAME = "";` to see quest info about that user, or leave the quotes empty to see quest info about the whole party.
-10. Click the drop-down menu to the right of the "Debug" button, near the top of the page. Select "printQuestInfo" from the drop-down.
-11. Click the "Run" button to the left of the "Debug" button.
-12. Click "Review permissions", then select your Google account. Click on "Advanced", then "Go to Print Quest Info (unsafe)". (Don't worry, it is safe!) Then click the "Allow" button.
-13. Wait for it to say "Execution completed".
+8. Click the "Save project" button near the top of the page (looks like a floppy disk).
+9. In the main menu on the left, click on "Project Settings" (looks like a cog).
+10. Click on the "Time zone" drop down and select the time zone you would like the spreadsheet to use.
+11. In the main menu on the left, click on "Editor" (looks like `<>`).
+12. [Create a new Google Sheet](https://sheets.google.com/create) and name it something like "[Party Name] Quest Info". Copy the URL in your address bar and paste it inside the quotations where it says `const SPREADSHEET_URL = "";`. If you've changed the tab name for the sheet you want to print quest info to, paste the tab name inside the quotes where it says `const SHEET_NAME = "";`.
+13. Add a party member's username between the quotations where it says `const USERNAME = "";` to see quest info about that user, or leave the quotes empty to see quest info about the whole party.
+14. Click the drop-down menu to the right of the "Debug" button, near the top of the page. Select "printQuestInfo" from the drop-down.
+15. Click the "Run" button to the left of the "Debug" button.
+16. Click "Review permissions", then select your Google account. Click on "Advanced", then "Go to Print Quest Info (unsafe)". (Don't worry, it is safe!) Then click the "Allow" button.
+17. Wait for it to say "Execution completed".
 
-Repeat steps 8-10 whenever you want to update the spreadsheet.
+Repeat steps 13-15 whenever you want to update the spreadsheet.
 
 ## Updating the Script
 You need to use a desktop computer for this. It will not work on a phone or tablet!
