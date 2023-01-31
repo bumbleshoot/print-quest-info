@@ -1,6 +1,8 @@
 ## Summary
 Print Quest Info prints useful info about all of Habitica's quests to a spreadsheet, including # of completions (party or user), completions needed (party or user), % complete (party or user), quest rewards, quest name, how to complete the quest, and party members with the quest scroll in their inventories.
 
+[<img title="Quest Info spreadsheet" src="https://github.com/bumbleshoot/print-quest-info/blob/main/print-quest-info.png?raw=true" width="250">](https://github.com/bumbleshoot/print-quest-info/blob/main/print-quest-info.png?raw=true)
+
 ## Setup Instructions
 You need to use a desktop computer for this. It will not work on a phone or tablet!
 1. Click [here](https://script.google.com/d/14BPBHQy4uGGT80F6ADZ7rsKSWh6l6AgGCFhcXSQP55SOQFYEkSsP6RA4/edit?usp=sharing) to go to the Print Quest Info script. If you're not already signed into your Google account, you will be asked to sign in.
