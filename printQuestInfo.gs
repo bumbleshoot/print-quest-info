@@ -1,5 +1,5 @@
 /**
- * Print Quest Info v4.1.8 by @bumbleshoot
+ * Print Quest Info v4.1.9 by @bumbleshoot
  *
  * See GitHub page for info & setup instructions:
  * https://github.com/bumbleshoot/print-quest-info
@@ -35,8 +35,6 @@ const scriptProperties = PropertiesService.getScriptProperties();
  * print info pertaining to that user. (Note: usernames are case 
  * sensitive!)
  */
-let members;
-let content;
 function printQuestInfo() {
 
   // open spreadsheet & sheet
@@ -60,12 +58,10 @@ function printQuestInfo() {
     }
   }
 
-  // get API data
-  members = JSON.parse(fetch("https://habitica.com/api/v3/groups/party/members?includeAllPublicFields=true", GET_PARAMS)).data;
-  if (typeof members === "undefined") {
-    members = [JSON.parse(fetch("https://habitica.com/api/v3/user", GET_PARAMS)).data];
+  // if no party, party = user
+  if (typeof getMembers() === "undefined") {
+    members = [getUser()];
   }
-  content = JSON.parse(fetch("https://habitica.com/api/v3/content", GET_PARAMS)).data;
 
   // if username not in party, print error & exit
   if (USERNAME !== "") {
@@ -301,7 +297,7 @@ function getQuestData() {
 
   // get lists of premium eggs, premium hatching potions & wacky hatching potions
   let premiumEggs = [];
-  for (let egg of Object.values(content.questEggs)) {
+  for (let egg of Object.values(getContent().questEggs)) {
     premiumEggs.push(egg.key);
   }
   let premiumHatchingPotions = [];
@@ -530,4 +526,88 @@ function getQuestData() {
     unlockableQuests,
     achievementQuests
   };
+}
+
+/**
+ * getUser(updated)
+ * 
+ * Fetches user data from the Habitica API if it hasn't already 
+ * been fetched during this execution, or if updated is set to 
+ * true.
+ */
+let user;
+function getUser(updated) {
+  if (updated || typeof user === "undefined") {
+    for (let i=0; i<3; i++) {
+      user = fetch("https://habitica.com/api/v3/user", GET_PARAMS);
+      try {
+        user = JSON.parse(user).data;
+        if (typeof user.party?._id !== "undefined") {
+          scriptProperties.setProperty("PARTY_ID", user.party._id);
+        }
+        break;
+      } catch (e) {
+        if (i < 2 && (e.stack.includes("Unterminated string in JSON") || e.stack.includes("Expected ',' or '}' after property value in JSON at position"))) {
+          continue;
+        } else {
+          throw e;
+        }
+      }
+    }
+  }
+  return user;
+}
+
+/**
+ * getMembers(updated)
+ * 
+ * Fetches party member data from the Habitica API if it hasn't 
+ * already been fetched during this execution, or if updated is 
+ * set to true.
+ */
+let members;
+function getMembers(updated) {
+  if (updated || typeof members === "undefined") {
+    for (let i=0; i<3; i++) {
+      members = fetch("https://habitica.com/api/v3/groups/party/members?includeAllPublicFields=true", GET_PARAMS);
+      try {
+        members = JSON.parse(members).data;
+        break;
+      } catch (e) {
+        if (i < 2 && (e.stack.includes("Unterminated string in JSON") || e.stack.includes("Expected ',' or '}' after property value in JSON at position"))) {
+          continue;
+        } else {
+          throw e;
+        }
+      }
+    }
+  }
+  return members;
+}
+
+/**
+ * getContent(updated)
+ * 
+ * Fetches content data from the Habitica API if it hasn't already 
+ * been fetched during this execution, or if updated is set to 
+ * true.
+ */
+let content;
+function getContent(updated) {
+  if (updated || typeof content === "undefined") {
+    for (let i=0; i<3; i++) {
+      content = fetch("https://habitica.com/api/v3/content", GET_PARAMS);
+      try {
+        content = JSON.parse(content).data;
+        break;
+      } catch (e) {
+        if (i < 2 && (e.stack.includes("Unterminated string in JSON") || e.stack.includes("Expected ',' or '}' after property value in JSON at position"))) {
+          continue;
+        } else {
+          throw e;
+        }
+      }
+    }
+  }
+  return content;
 }
