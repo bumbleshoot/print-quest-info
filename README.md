@@ -4,7 +4,7 @@ Print Quest Info prints useful info about all of Habitica's quests to a spreadsh
 [<img title="Quest Info spreadsheet" src="https://github.com/bumbleshoot/print-quest-info/blob/main/print-quest-info.png?raw=true" width="250">](https://github.com/bumbleshoot/print-quest-info/blob/main/print-quest-info.png?raw=true)
 
 ## Setup Instructions
-You need to use a desktop computer for this. It will not work on a phone or tablet!
+It is highly recommended that you use a desktop computer for this, as some of the steps don't work well on mobile.
 1. Click [here](https://script.google.com/d/14BPBHQy4uGGT80F6ADZ7rsKSWh6l6AgGCFhcXSQP55SOQFYEkSsP6RA4/edit?usp=sharing) to go to the Print Quest Info script. If you're not already signed into your Google account, you will be asked to sign in.
 2. In the main menu on the left, click on "Overview" (looks like a lowercase letter i inside a circle).
 3. Click the "Make a copy" button (looks like two pages of paper).
@@ -26,7 +26,7 @@ You need to use a desktop computer for this. It will not work on a phone or tabl
 Repeat steps 13-15 whenever you want to update the spreadsheet.
 
 ## Updating the Script
-You need to use a desktop computer for this. It will not work on a phone or tablet!
+It is highly recommended that you use a desktop computer for this, as some of the steps don't work well on mobile.
 1. [Click here](https://script.google.com/home) to see a list of your scripts. If you're not already signed into your Google account, click the "Start Scripting" button and sign in.  Then click on "My Projects" in the main menu on the left.
 2. Click on "Print Quest Info".
 3. Copy & paste your settings (`const`s) into a text editor so you can reference them while setting up the new version.
