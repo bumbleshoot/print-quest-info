@@ -5,7 +5,7 @@ Print Quest Info prints useful info about all of Habitica's quests to a spreadsh
 
 ## Setup Instructions
 It is highly recommended that you use a desktop computer for this, as some of the steps don't work well on mobile.
-1. Click [here](https://script.google.com/d/14BPBHQy4uGGT80F6ADZ7rsKSWh6l6AgGCFhcXSQP55SOQFYEkSsP6RA4?usp=sharing) to go to the Print Quest Info script. If you're not already signed into your Google account, you will be asked to sign in.
+1. Click [here](https://script.google.com/home/projects/14BPBHQy4uGGT80F6ADZ7rsKSWh6l6AgGCFhcXSQP55SOQFYEkSsP6RA4/) to go to the Print Quest Info script. If you're not signed into your Google account, click on "Start Scripting", then sign in, then click on the script link again.
 2. Click the "Make a copy" button (looks like two pages of paper).
 3. At the top of your screen, click on "Copy of Print Quest Info". Rename it "Print Quest Info" and click the "Rename" button.
 4. Click on "Project Settings" in the main menu. Select your time zone from the drop down. Wait for it to finish saving, then click on "Editor" in the main menu.
